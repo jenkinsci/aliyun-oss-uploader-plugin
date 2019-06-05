@@ -1,0 +1,27 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="${%Endpoint}" field="endpoint">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%AccessKeyId}" field="accessKeyId">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%AccessKeySecret}" field="accessKeySecret">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%BucketName}" field="bucketName">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%LocalPath}" field="localPath">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%RemotePath}" field="remotePath">
+        <f:textbox />
+    </f:entry>
+    <f:advanced>
+        <f:entry title="${%French}" field="useFrench"
+                 description="${%FrenchDescr}">
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
+</j:jelly>
