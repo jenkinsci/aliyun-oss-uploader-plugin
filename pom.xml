@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>aliyun-oss-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RELEASE</version>
     <packaging>hpi</packaging>
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
