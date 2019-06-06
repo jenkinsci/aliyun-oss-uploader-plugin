@@ -19,9 +19,8 @@
         <f:textbox />
     </f:entry>
     <f:advanced>
-        <f:entry title="${%French}" field="useFrench"
-                 description="${%FrenchDescr}">
-            <f:checkbox />
+        <f:entry title="${%MaxRetries}" field="maxRetries">
+            <f:textbox />
         </f:entry>
     </f:advanced>
 </j:jelly>

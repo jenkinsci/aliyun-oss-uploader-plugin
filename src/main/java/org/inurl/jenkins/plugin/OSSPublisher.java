@@ -12,7 +12,9 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
+import jnr.ffi.annotations.In;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -35,6 +37,8 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     private final String localPath;
 
     private final String remotePath;
+
+    private final String maxRetries;
 
 
     public String getEndpoint() {
@@ -61,14 +65,19 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         return remotePath;
     }
 
+    public int getMaxRetries() {
+        return StringUtils.isEmpty(maxRetries) ? 3 : Integer.parseInt(maxRetries);
+    }
+
     @DataBoundConstructor
-    public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String localPath, String remotePath) {
+    public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String localPath, String remotePath, String maxRetries) {
         this.endpoint = endpoint;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
         this.bucketName = bucketName;
         this.localPath = localPath;
         this.remotePath = remotePath;
+        this.maxRetries = maxRetries;
     }
 
     @Override
@@ -82,15 +91,17 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret);
         String local = localPath.substring(1);
         String remote = remotePath.substring(1);
-        logger.println("workspace => " + workspace);
         FilePath p = new FilePath(workspace, local);
         if (p.isDirectory()) {
             logger.println("upload dir => " + p);
             upload(client, logger, remote, p, true);
+            logger.println("upload dir success");
         } else {
             logger.println("upload file => " + p);
             uploadFile(client, logger, remote, p);
+            logger.println("upload file success");
         }
+
     }
 
     private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root) throws InterruptedException, IOException {
@@ -104,6 +115,23 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path) throws InterruptedException, IOException {
+        int maxRetries = getMaxRetries();
+        int retries = 0;
+        do {
+            if (retries > 0) {
+                logger.println("upload retrying (" + retries + "/" + maxRetries +")");
+            }
+            try {
+                uploadFile0(client, logger, key, path);
+                return;
+            } catch (Exception e) {
+                e.printStackTrace(logger);
+            }
+        } while ((++retries) <= maxRetries);
+        throw new RuntimeException("upload fail, more than the max of retries");
+    }
+
+    private void uploadFile0(OSSClient client, PrintStream logger, String key, FilePath path) throws InterruptedException, IOException {
         String realKey = key;
         if (realKey.startsWith("/")) {
             realKey = realKey.substring(1);
@@ -117,6 +145,15 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+
+        public FormValidation doCheckMaxRetries(@QueryParameter String value) {
+            try {
+                Integer.parseInt(value);
+            } catch (Exception e) {
+                return FormValidation.error(Messages.OSSPublish_MaxRetiesMustBeNumbers());
+            }
+            return FormValidation.ok();
+        }
 
         public FormValidation doCheckEndpoint(@QueryParameter(required = true) String value) {
             return checkValue(value, Messages.OSSPublish_MissingEndpoint());
