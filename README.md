@@ -53,10 +53,10 @@
 
 2. 打包
 ```bash
-mvn package
+mvn clean package -DskipTests
 ```
 
 3. 运行
 ```bash
-mvn hpi:run
+mvn clean hpi:run
 ```
