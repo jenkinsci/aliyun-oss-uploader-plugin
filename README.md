@@ -2,11 +2,15 @@
 
 ## 使用
 
-1.增加`构建后操作`，选择`阿里云OSS上传`
+1.[下载hpi文件](https://www.google.com "title text")
+
+2.在plugins管理页面上传hpi文件并安装，重启jenkins
+
+3.修改项目，增加`构建后操作`，选择`阿里云OSS上传`
 
 ![](https://github.com/raylax/jenkins-aliyun-oss-plugin/raw/master/image/step1.png)
 
-2.填写阿里云OSS配置信息
+4.填写阿里云OSS配置信息
 
 ![](https://github.com/raylax/jenkins-aliyun-oss-plugin/raw/master/image/step2.png)
 
