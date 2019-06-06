@@ -34,7 +34,7 @@
 <profile>
   <id>jenkins</id>
   <activation>
-    <activeByDefault>true</activeByDefault> <!-- change this to false, if you don't like to have it on per default -->
+    <activeByDefault>true</activeByDefault>
   </activation>
   <repositories>
     <repository>
