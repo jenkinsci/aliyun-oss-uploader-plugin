@@ -8,7 +8,7 @@
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
-    <artifactId>aliyun-oss-plugin</artifactId>
+    <artifactId>aliyun-oss-uploader</artifactId>
     <version>1.0-RELEASE</version>
     <packaging>hpi</packaging>
     <properties>
