@@ -17,7 +17,7 @@
 ![](https://github.com/raylax/jenkins-aliyun-oss-plugin/raw/master/image/step2.png)
 
 > 本地路径为相对于workspace的路径，例如填写为`/abc`，则本地路径为`${WORKSPACE}/abc`
-本地路径可以设置为文件或目录
+本地路径可以设置为文件或目录。如果设置为文件则上传单个文件，设置为目录上传整个目录
 
 ## 构建
 
