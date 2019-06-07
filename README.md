@@ -4,7 +4,7 @@
 
 1.下载hpi文件
 
-[aliyun-oss-plugin.hpi](https://github.com/raylax/jenkins-aliyun-oss-uploader/releases/latest)
+[aliyun-oss-uploader.hpi](https://github.com/raylax/jenkins-aliyun-oss-uploader/releases/latest)
 
 2.在plugins管理页面上传hpi文件并安装，重启jenkins
 

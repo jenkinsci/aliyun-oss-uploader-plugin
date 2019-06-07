@@ -11,10 +11,10 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
-import jnr.ffi.annotations.In;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -30,7 +30,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     private final String accessKeyId;
 
-    private final String accessKeySecret;
+    private final Secret accessKeySecret;
 
     private final String bucketName;
 
@@ -50,7 +50,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     public String getAccessKeySecret() {
-        return accessKeySecret;
+        return accessKeySecret.getPlainText();
     }
 
     public String getBucketName() {
@@ -73,7 +73,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String localPath, String remotePath, String maxRetries) {
         this.endpoint = endpoint;
         this.accessKeyId = accessKeyId;
-        this.accessKeySecret = accessKeySecret;
+        this.accessKeySecret = Secret.fromString(accessKeySecret);
         this.bucketName = bucketName;
         this.localPath = localPath;
         this.remotePath = remotePath;
@@ -88,7 +88,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
-        OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+        OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
         String local = localPath.substring(1);
         String remote = remotePath.substring(1);
         FilePath p = new FilePath(workspace, local);
@@ -115,6 +115,10 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path) throws InterruptedException, IOException {
+        if (!path.exists()) {
+            logger.println("file [" + path.getRemote() + "] not exists, skipped");
+            return;
+        }
         int maxRetries = getMaxRetries();
         int retries = 0;
         do {
@@ -143,6 +147,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         client.putObject(bucketName, realKey, inputStream);
     }
 
+    @Symbol("aliyunOSSUpload")
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -173,11 +178,18 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         }
 
         public FormValidation doCheckLocalPath(@QueryParameter(required = true) String value) {
-            return checkValue(value, Messages.OSSPublish_MissingLocalPath());
+            return checkBeginWithSlash(value);
         }
 
         public FormValidation doCheckRemotePath(@QueryParameter(required = true) String value) {
-            return checkValue(value, Messages.OSSPublish_MissingRemotePath());
+            return checkBeginWithSlash(value);
+        }
+
+        private FormValidation checkBeginWithSlash(String value) {
+            if (!value.startsWith("/")) {
+                return FormValidation.error(Messages.OSSPublish_MustBeginWithSlash());
+            }
+            return FormValidation.ok();
         }
 
         private FormValidation checkValue(String value, String message) {
