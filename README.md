@@ -2,11 +2,15 @@
 
 ## 使用
 
-1.下载hpi文件
+1.下载源码&编译
 
-[aliyun-oss-uploader.hpi](https://github.com/raylax/jenkins-aliyun-oss-uploader/releases/latest)
+```bash
+git clone https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git
+cd aliyun-oss-uploader-plugin
+mvn package -DskipTests
+```
 
-2.在plugins管理页面上传hpi文件并安装，重启jenkins
+2.在plugins管理页面上传target下的hpi文件并安装，重启jenkins
 
 3.修改项目，增加`构建后操作`，选择`阿里云OSS上传`
 
