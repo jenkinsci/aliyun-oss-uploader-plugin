@@ -1,5 +1,11 @@
 package org.inurl.jenkins.plugin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+
+import javax.annotation.Nonnull;
+
 import com.aliyun.oss.OSSClient;
 import hudson.Extension;
 import hudson.FilePath;
@@ -18,12 +24,6 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-
 public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     private final String endpoint;
@@ -39,7 +39,6 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     private final String remotePath;
 
     private final String maxRetries;
-
 
     public String getEndpoint() {
         return endpoint;
@@ -70,7 +69,8 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     @DataBoundConstructor
-    public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String localPath, String remotePath, String maxRetries) {
+    public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName,
+        String localPath, String remotePath, String maxRetries) {
         this.endpoint = endpoint;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = Secret.fromString(accessKeySecret);
@@ -86,7 +86,8 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
+        @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
         String local = localPath.substring(1);
@@ -104,17 +105,19 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     }
 
-    private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root) throws InterruptedException, IOException {
+    private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root)
+        throws InterruptedException, IOException {
         if (path.isDirectory()) {
             for (FilePath f : path.list()) {
-                upload(client, logger, base + (root ? "" : ("/" +  path.getName())), f, false);
+                upload(client, logger, base + (root ? "" : ("/" + path.getName())), f, false);
             }
             return;
         }
         uploadFile(client, logger, base + "/" + path.getName(), path);
     }
 
-    private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path) throws InterruptedException, IOException {
+    private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path)
+        throws InterruptedException, IOException {
         if (!path.exists()) {
             logger.println("file [" + path.getRemote() + "] not exists, skipped");
             return;
@@ -123,7 +126,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         int retries = 0;
         do {
             if (retries > 0) {
-                logger.println("upload retrying (" + retries + "/" + maxRetries +")");
+                logger.println("upload retrying (" + retries + "/" + maxRetries + ")");
             }
             try {
                 uploadFile0(client, logger, key, path);
@@ -135,14 +138,14 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         throw new RuntimeException("upload fail, more than the max of retries");
     }
 
-    private void uploadFile0(OSSClient client, PrintStream logger, String key, FilePath path) throws InterruptedException, IOException {
+    private void uploadFile0(OSSClient client, PrintStream logger, String key, FilePath path)
+        throws InterruptedException, IOException {
         String realKey = key;
         if (realKey.startsWith("/")) {
             realKey = realKey.substring(1);
         }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        path.copyTo(outputStream);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+        InputStream inputStream = path.read();
         logger.println("uploading [" + path.getRemote() + "] to [" + realKey + "]");
         client.putObject(bucketName, realKey, inputStream);
     }
@@ -171,7 +174,6 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         public FormValidation doCheckAccessKeySecret(@QueryParameter(required = true) String value) {
             return checkValue(value, Messages.OSSPublish_MissingAccessKeySecret());
         }
-
 
         public FormValidation doCheckBucketName(@QueryParameter(required = true) String value) {
             return checkValue(value, Messages.OSSPublish_MissingBucketName());
