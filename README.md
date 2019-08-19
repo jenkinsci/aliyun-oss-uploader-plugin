@@ -12,10 +12,10 @@ mvn package -DskipTests
 2.在plugins管理页面上传target下的hpi文件并安装，重启jenkins
 
 3.修改项目，增加`构建后操作`，选择`阿里云OSS上传`
-![](https://github.com/raylax/jenkins-aliyun-oss-plugin/raw/master/image/step1.png)
+![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step1.png)
 
 4.填写阿里云OSS配置信息
-![](https://github.com/raylax/jenkins-aliyun-oss-plugin/raw/master/image/step2.png)
+![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step2.png)
 
 > 本地路径为相对于workspace的路径，例如填写为`/abc`，则本地路径为`${WORKSPACE}/abc`
 本地路径可以设置为文件或目录。如果设置为文件则上传单个文件，设置为目录上传整个目录
