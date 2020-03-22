@@ -10,6 +10,7 @@ import com.aliyun.oss.OSSClient;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.EnvVars;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -89,17 +90,23 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
         @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
+	EnvVars envVars = run.getEnvironment(listener);
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
         String local = localPath.substring(1);
         String remote = remotePath.substring(1);
-        FilePath p = new FilePath(workspace, local);
+        
+	String expandLocal = envVars.expand(local);
+	String expandRemote = envVars.expand(remote);
+	logger.println("expandLocalPath =>" + expandLocal);
+	logger.println("expandRemotePath =>" + expandRemote);
+	FilePath p = new FilePath(workspace, expandLocal);
         if (p.isDirectory()) {
             logger.println("upload dir => " + p);
-            upload(client, logger, remote, p, true);
+            upload(client, logger, expandRemote, p, true);
             logger.println("upload dir success");
         } else {
             logger.println("upload file => " + p);
-            uploadFile(client, logger, remote, p);
+            uploadFile(client, logger, expandRemote, p);
             logger.println("upload file success");
         }
 
