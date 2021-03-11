@@ -92,24 +92,28 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
+
         String local = localPath.substring(1);
-        String remote = remotePath.substring(1);
-
-        String expandLocal = envVars.expand(local);
-        String expandRemote = envVars.expand(remote);
-        logger.println("expandLocalPath =>" + expandLocal);
-        logger.println("expandRemotePath =>" + expandRemote);
-        FilePath p = new FilePath(workspace, expandLocal);
-        if (p.isDirectory()) {
-            logger.println("upload dir => " + p);
-            upload(client, logger, expandRemote, p, true);
-            logger.println("upload dir success");
-        } else {
-            logger.println("upload file => " + p);
-            uploadFile(client, logger, expandRemote, p);
-            logger.println("upload file success");
+        
+        String[] remotes = remotePath.split(",");
+        for (String remote : remotes) {
+            remote = remote.substring(1);
+            String expandLocal = envVars.expand(local);
+            String expandRemote = envVars.expand(remote);
+            logger.println("expandLocalPath =>" + expandLocal);
+            logger.println("expandRemotePath =>" + expandRemote);
+            FilePath p = new FilePath(workspace, expandLocal);
+            if (p.isDirectory()) {
+                logger.println("upload dir => " + p);
+                upload(client, logger, expandRemote, p, true);
+                logger.println("upload dir success");
+            } else {
+                logger.println("upload file => " + p);
+                uploadFile(client, logger, expandRemote, p);
+                logger.println("upload file success");
+            }
         }
-
+        
     }
 
     private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root)
