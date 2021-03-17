@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>aliyun-oss-uploader</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4</version>
     <packaging>hpi</packaging>
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
@@ -97,7 +97,7 @@
         <connection>scm:git:ssh://git@github.com/jenkinsci/aliyun-oss-uploader-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/aliyun-oss-uploader-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/aliyun-oss-uploader-plugin</url>
-      <tag>HEAD</tag>
+      <tag>aliyun-oss-uploader-1.4</tag>
   </scm>
 
     <repositories>
