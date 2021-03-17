@@ -71,7 +71,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     @DataBoundConstructor
     public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName,
-        String localPath, String remotePath, String maxRetries) {
+            String localPath, String remotePath, String maxRetries) {
         this.endpoint = endpoint;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = Secret.fromString(accessKeySecret);
@@ -88,32 +88,36 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+            @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
-	EnvVars envVars = run.getEnvironment(listener);
+        EnvVars envVars = run.getEnvironment(listener);
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
-        String local = localPath.substring(1);
-        String remote = remotePath.substring(1);
-        
-	String expandLocal = envVars.expand(local);
-	String expandRemote = envVars.expand(remote);
-	logger.println("expandLocalPath =>" + expandLocal);
-	logger.println("expandRemotePath =>" + expandRemote);
-	FilePath p = new FilePath(workspace, expandLocal);
-        if (p.isDirectory()) {
-            logger.println("upload dir => " + p);
-            upload(client, logger, expandRemote, p, true);
-            logger.println("upload dir success");
-        } else {
-            logger.println("upload file => " + p);
-            uploadFile(client, logger, expandRemote, p);
-            logger.println("upload file success");
-        }
 
+        String local = localPath.substring(1);
+        
+        String[] remotes = remotePath.split(",");
+        for (String remote : remotes) {
+            remote = remote.substring(1);
+            String expandLocal = envVars.expand(local);
+            String expandRemote = envVars.expand(remote);
+            logger.println("expandLocalPath =>" + expandLocal);
+            logger.println("expandRemotePath =>" + expandRemote);
+            FilePath p = new FilePath(workspace, expandLocal);
+            if (p.isDirectory()) {
+                logger.println("upload dir => " + p);
+                upload(client, logger, expandRemote, p, true);
+                logger.println("upload dir success");
+            } else {
+                logger.println("upload file => " + p);
+                uploadFile(client, logger, expandRemote, p);
+                logger.println("upload file success");
+            }
+        }
+        
     }
 
     private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root)
-        throws InterruptedException, IOException {
+            throws InterruptedException, IOException {
         if (path.isDirectory()) {
             for (FilePath f : path.list()) {
                 upload(client, logger, base + (root ? "" : ("/" + path.getName())), f, false);
@@ -124,7 +128,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path)
-        throws InterruptedException, IOException {
+            throws InterruptedException, IOException {
         if (!path.exists()) {
             logger.println("file [" + path.getRemote() + "] not exists, skipped");
             return;
@@ -146,7 +150,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     private void uploadFile0(OSSClient client, PrintStream logger, String key, FilePath path)
-        throws InterruptedException, IOException {
+            throws InterruptedException, IOException {
         String realKey = key;
         if (realKey.startsWith("/")) {
             realKey = realKey.substring(1);
