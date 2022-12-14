@@ -26,5 +26,8 @@
         <f:entry title="${%MaxRetries}" field="maxRetries">
             <f:textbox />
         </f:entry>
+        <f:entry field="objectACL" title="${%ObjectACL}">
+           <f:select />
+        </f:entry>
     </f:advanced>
 </j:jelly>
