@@ -1,69 +1,87 @@
-# jenkins阿里云OSS上传插件
+# Aliyun OSS Uploader Plugin
 
-## 使用
+> **Version**: 1.6.0  
+> **Requires**: Jenkins ≥ 2.479.3, JDK 17+
 
-1.下载源码&编译
+Jenkins plugin that uploads build artifacts to [Aliyun OSS](https://www.alibabacloud.com/product/oss).
+
+This fork updates the plugin for modern Jenkins cores that no longer ship Apache Commons Lang 2.x (`org.apache.commons.lang.StringUtils`), which previously broke the job configuration UI and upload step.
+
+## Changes (1.5-SNAPSHOT → 1.6.0)
+
+- Bump plugin parent POM to `5.31` and import `bom-2.479.x`
+- Switch to `commons-lang3` via the `commons-lang3-api` plugin
+- Upgrade Aliyun OSS SDK `2.8.3` → `3.18.1` (`OSSClientBuilder`)
+- Mark form-validation methods with `@POST`; close upload streams and shut down the OSS client
+
+Job configuration fields and the Pipeline `@Symbol("aliyunOSSUpload")` remain compatible; existing job configs generally do not need XML changes.
+
+## Build
 
 ```bash
-git clone https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git
-cd aliyun-oss-uploader-plugin
-mvn package -DskipTests
+mvn -U clean package -DskipTests
 ```
-2.在plugins管理页面上传target下的hpi文件并安装，重启jenkins
 
-3.修改项目，增加`构建后操作`，选择`阿里云OSS上传`
-![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step1.png)
+Artifact: `target/aliyun-oss-uploader.hpi`
 
-4.填写阿里云OSS配置信息
-![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step2.png)
+Maven must be able to resolve artifacts from `https://repo.jenkins-ci.org/public/`. Example `~/.m2/settings.xml` fragments:
 
-> 本地路径为相对于workspace的路径，例如填写为`/abc`，则本地路径为`${WORKSPACE}/abc`
-本地路径可以设置为文件或目录。如果设置为文件则上传单个文件，设置为目录上传整个目录
-
-## 构建
-
-1. 修改`${USER}/.m2/settings.xml`中的maven配置文件
-
-在`mirrors`节点中增加
 ```xml
-<mirror>
-  <id>repo.jenkins-ci.org</id>
-  <url>https://repo.jenkins-ci.org/public/</url>
-  <mirrorOf>m.g.o-public</mirrorOf>
-</mirror>
-```
-在`pluginGroups`节点中增加
-```xml
-<pluginGroup>org.jenkins-ci.tools</pluginGroup>
-```
-在`profiles`节点中增加
-```xml
-<profile>
-  <id>jenkins</id>
-  <activation>
-    <activeByDefault>true</activeByDefault>
-  </activation>
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
-</profile>
+<pluginGroups>
+  <pluginGroup>org.jenkins-ci.tools</pluginGroup>
+</pluginGroups>
+
+<profiles>
+  <profile>
+    <id>jenkins</id>
+    <activation>
+      <activeByDefault>true</activeByDefault>
+    </activation>
+    <repositories>
+      <repository>
+        <id>repo.jenkins-ci.org</id>
+        <url>https://repo.jenkins-ci.org/public/</url>
+      </repository>
+    </repositories>
+    <pluginRepositories>
+      <pluginRepository>
+        <id>repo.jenkins-ci.org</id>
+        <url>https://repo.jenkins-ci.org/public/</url>
+      </pluginRepository>
+    </pluginRepositories>
+  </profile>
+</profiles>
 ```
 
-2. 打包
-```bash
-mvn clean package -DskipTests
+## Install
+
+1. **Manage Jenkins → Plugins → Advanced settings → Deploy Plugin** and upload `target/aliyun-oss-uploader.hpi`, **or** copy the file into `$JENKINS_HOME/plugins/aliyun-oss-uploader.jpi`.
+2. Remove any exploded directory `$JENKINS_HOME/plugins/aliyun-oss-uploader` if present, then restart Jenkins (or use **Download now and install after restart**).
+3. Ensure the `commons-lang3-api` plugin is installed (declared as a dependency; Update Center should pull it automatically).
+4. Open a job that uses **Aliyun OSS Upload**, confirm the configuration section loads, and run a build that exercises the publisher.
+
+## Usage
+
+Add a post-build action **Aliyun OSS Upload**:
+
+- Local and remote paths must start with `/` (paths are relative to the job workspace)
+- Remote path accepts multiple comma-separated destinations
+- `maxRetries` may be left empty (default: `3`)
+
+Pipeline example:
+
+```groovy
+aliyunOSSUpload(
+  endpoint: 'https://oss-cn-hangzhou.aliyuncs.com',
+  accessKeyId: '…',
+  accessKeySecret: '…',
+  bucketName: 'my-bucket',
+  localPath: '/dist',
+  remotePath: '/releases/${BUILD_NUMBER}'
+)
 ```
 
-3. 运行
-```bash
-mvn clean hpi:run
-```
+## License
+
+This project is licensed under [The MIT License](https://opensource.org/licenses/MIT).
+See [LICENSE](LICENSE) for the full license text.

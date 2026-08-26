@@ -5,26 +5,26 @@
          xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry title="${%Endpoint}" field="endpoint">
-        <f:textbox />
+        <f:textbox checkMethod="post" />
     </f:entry>
     <f:entry title="${%AccessKeyId}" field="accessKeyId">
-        <f:textbox />
+        <f:textbox checkMethod="post" />
     </f:entry>
     <f:entry title="${%AccessKeySecret}" field="accessKeySecret">
-        <f:password/>
+        <f:password checkMethod="post" />
     </f:entry>
     <f:entry title="${%BucketName}" field="bucketName">
-        <f:textbox />
+        <f:textbox checkMethod="post" />
     </f:entry>
     <f:entry title="${%LocalPath}" field="localPath">
-        <f:textbox />
+        <f:textbox checkMethod="post" />
     </f:entry>
     <f:entry title="${%RemotePath}" field="remotePath">
-        <f:textbox />
+        <f:textbox checkMethod="post" />
     </f:entry>
     <f:advanced>
         <f:entry title="${%MaxRetries}" field="maxRetries">
-            <f:textbox />
+            <f:textbox checkMethod="post" />
         </f:entry>
     </f:advanced>
 </j:jelly>
