@@ -1,0 +1,47 @@
+# Aliyun OSS Uploader 2.0.0 发布说明草稿
+
+状态：未发布，发布日期待定。
+
+2.0.0 新增对象 ACL 和缺失文件处理选项，修复 Pipeline 参数还原问题，并统一升级 Jenkins 基线、依赖与构建环境。
+
+## 最低环境要求
+
+- Jenkins **2.555.3 或更新版本**。
+- Jenkins 控制器和代理使用 **Java 21 或 Java 25**。
+- 仅源码构建需要 Maven **3.9.6 或更新版本**；仓库中的 Maven Wrapper 使用 **3.9.9**。
+
+相较 1.4，最低 Jenkins 版本从 2.7.3 提高至 2.555.3，最低 Java 版本从 8 提高至 21。安装本版本前，请先让 Jenkins 和 Java 环境满足上述要求。
+
+## 新增功能
+
+- **对象访问权限**：通过界面或 Pipeline 的 `objectACL` 参数选择 `default`、`private`、`public-read` 或 `public-read-write`。未指定时不发送对象 ACL 请求头，保持原有上传行为；显式选择 `default` 时，对象权限跟随存储空间的 ACL。配置支持保存、重载和 Pipeline 参数往返，非法或不支持的 ACL 值会被拒绝。[#6](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/6)、[#15](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/15)
+- **缺失上传路径时使构建失败**：新增可选参数 `throwExceptionWhenFilePathNotExisted`，启用后，本地上传文件或目录不存在会使构建失败。默认关闭，已有任务继续记录日志并跳过缺失路径。[#12](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/12)
+
+## 问题修复
+
+- 修复 Pipeline 还原 `maxRetries` 参数时 String 与 Integer 类型不一致导致的 `ClassCastException`；省略或留空时仍默认重试 3 次。[#14](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/14)
+- 补充插件管理器中的插件说明。[#4](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/4)
+
+## 依赖与运行兼容性
+
+- 阿里云 OSS Java SDK 从 **2.8.3 升级至 3.18.5**，上传完成或失败后均关闭客户端，并关闭上传输入流。
+- 将 Commons Lang 2 迁移至 `commons-lang3-api`，适配新版 Jenkins；表单校验改用 POST。
+- 使用匹配 Jenkins 基线的 BOM 统一管理 Structs、Pipeline 和 API 插件依赖。
+- 使用 `gson-api`、`apache-httpcomponents-client-4-api` 提供相应库，移除重复的 JAXB、Activation 和 SLF4J API 打包项，并启用严格 HPI 打包清单校验。
+
+以上依赖与兼容性升级由 [#16](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/pull/16) 统一整合。
+
+## 升级说明
+
+1. 按照 [Jenkins 官方升级指南](https://www.jenkins.io/doc/upgrade-guide/) 完成 Jenkins、控制器与代理 Java 环境的升级，达到本版本的最低要求。
+2. 通过 Jenkins 插件管理器安装本版本及其依赖。手工上传 HPI 时，也需要确认依赖插件已安装并满足版本要求。
+3. 原有任务 XML、`aliyunOSSUpload` 步骤和配置字段名保持兼容。本次新增参数不要求改写已有 Pipeline 脚本。
+4. 在测试任务中确认文件和目录上传结果，并按需要设置 ACL 与缺失文件处理选项，再更新正式任务。
+
+## 验证范围
+
+Linux Java 21、Windows Java 21、Linux Java 25 的 CI 均通过，每个平台各通过 21 项自动测试。测试覆盖旧任务 XML、表单保存与重载、密钥保留、Pipeline 参数与步骤执行，以及 SDK 向本地 HTTP 服务发送的上传内容和 ACL 请求头。
+
+真实 OSS 存储空间的上传烟测仍待发布前完成。
+
+[查看自 1.4 以来的完整变更](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/compare/aliyun-oss-uploader-1.4...e33d3317b74632838dd5cb3407454dba1fdd5a61)
