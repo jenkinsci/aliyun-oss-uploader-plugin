@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import javax.annotation.Nonnull;
 
 import com.aliyun.oss.OSSClient;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -23,6 +24,7 @@ import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 public class OSSPublisher extends Publisher implements SimpleBuildStep {
@@ -41,7 +43,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     private final String maxRetries;
 
-    private final Boolean throwExceptionWhenFilePathNotExisted;
+    private boolean throwExceptionWhenFilePathNotExisted;
 
     public String getEndpoint() {
         return endpoint;
@@ -77,7 +79,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
     @DataBoundConstructor
     public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName,
-            String localPath, String remotePath, String maxRetries, Boolean throwExceptionWhenFilePathNotExisted) {
+            String localPath, String remotePath, String maxRetries) {
         this.endpoint = endpoint;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = Secret.fromString(accessKeySecret);
@@ -85,11 +87,15 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         this.localPath = localPath;
         this.remotePath = remotePath;
         this.maxRetries = maxRetries;
-        if (null == throwExceptionWhenFilePathNotExisted) {
-            this.throwExceptionWhenFilePathNotExisted = true;
-        } else {
-            this.throwExceptionWhenFilePathNotExisted = throwExceptionWhenFilePathNotExisted;
-        }
+    }
+
+    public boolean isThrowExceptionWhenFilePathNotExisted() {
+        return throwExceptionWhenFilePathNotExisted;
+    }
+
+    @DataBoundSetter
+    public void setThrowExceptionWhenFilePathNotExisted(boolean throwExceptionWhenFilePathNotExisted) {
+        this.throwExceptionWhenFilePathNotExisted = throwExceptionWhenFilePathNotExisted;
     }
 
     @Override
@@ -142,7 +148,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
             throws InterruptedException, IOException {
         if (!path.exists()) {
             if (this.throwExceptionWhenFilePathNotExisted) {
-                throw new RuntimeException("upload fail, file [" + path.getRemote() + "] not exists");
+                throw new AbortException("upload fail, file [" + path.getRemote() + "] not exists");
             }
             logger.println("file [" + path.getRemote() + "] not exists, skipped");
             return;
