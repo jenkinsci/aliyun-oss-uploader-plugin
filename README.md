@@ -4,11 +4,13 @@ English | [简体中文](README.zh-CN.md)
 
 ## Requirements
 
-The current development version requires **Jenkins 2.555.3 or newer and Java 21 or 25**. Upgrade Jenkins and the Java runtimes on the controller and all agents before upgrading from an older plugin version.
+Starting with 2.1.0, the plugin requires **Jenkins 2.479.3 or newer and Java 17 or 21**. Newer Jenkins releases may require a newer Java runtime. Upgrade Jenkins and the Java runtimes on the controller and all agents as needed before upgrading from an older plugin version.
+
+The published 2.0.0 release still requires Jenkins 2.555.3 or newer and Java 21 or 25.
 
 Existing job configuration, `aliyunOSSUpload` Pipeline parameters, the missing-file option, and object ACL settings remain compatible.
 
-Building from source requires Maven 3.9.6 or newer and JDK 21/25. The Maven Wrapper uses Maven 3.9.9. Pipeline dependencies are managed by a BOM matching the Jenkins baseline.
+Building from source requires Maven 3.9.6 or newer and JDK 17/21. The Maven Wrapper uses Maven 3.9.9. Pipeline dependencies are managed by a BOM matching the Jenkins baseline.
 
 ## Usage
 
@@ -90,5 +92,7 @@ mvn clean hpi:run
 
 ## Release documentation
 
+- [2.1.0 release notes](docs/releases/2.1.0.md)
+- [2.1.0 release and downloads](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.1.0)
 - [2.0.0 release notes](docs/releases/2.0.0.md)
 - [2.0.0 release and downloads](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.0.0)
