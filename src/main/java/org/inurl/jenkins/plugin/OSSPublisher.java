@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.CannedAccessControlList;
+import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PutObjectRequest;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -19,6 +23,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +49,9 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     private final String maxRetries;
 
     private boolean throwExceptionWhenFilePathNotExisted;
+
+    @CheckForNull
+    private String objectACL;
 
     public String getEndpoint() {
         return endpoint;
@@ -77,6 +85,28 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         return StringUtils.isEmpty(maxRetries) ? 3 : Integer.parseInt(maxRetries);
     }
 
+    @CheckForNull
+    public String getObjectACL() {
+        return objectACL;
+    }
+
+    @DataBoundSetter
+    public void setObjectACL(@CheckForNull String objectACL) {
+        parseObjectACL(objectACL);
+        this.objectACL = StringUtils.isEmpty(objectACL) ? null : objectACL;
+    }
+
+    private static CannedAccessControlList parseObjectACL(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            return CannedAccessControlList.parse(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(Messages.OSSPublish_ObjectACLNotSupport(), e);
+        }
+    }
+
     @DataBoundConstructor
     public OSSPublisher(String endpoint, String accessKeyId, String accessKeySecret, String bucketName,
             String localPath, String remotePath, String maxRetries) {
@@ -106,6 +136,8 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
             @Nonnull TaskListener listener) throws InterruptedException, IOException {
+        // Also validate settings loaded directly from existing job XML.
+        parseObjectACL(objectACL);
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
         OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
@@ -175,10 +207,18 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         if (realKey.startsWith("/")) {
             realKey = realKey.substring(1);
         }
-
-        InputStream inputStream = path.read();
-        logger.println("uploading [" + path.getRemote() + "] to [" + realKey + "]");
-        client.putObject(bucketName, realKey, inputStream);
+        CannedAccessControlList acl = parseObjectACL(objectACL);
+        try (InputStream inputStream = path.read()) {
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, realKey, inputStream);
+            if (acl != null) {
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setObjectAcl(acl);
+                putObjectRequest.setMetadata(metadata);
+            }
+            logger.println("uploading [" + path.getRemote() + "] to [" + realKey + "] with acl ["
+                    + (acl == null ? "unspecified" : acl) + "]");
+            client.putObject(putObjectRequest);
+        }
     }
 
     @Symbol("aliyunOSSUpload")
@@ -230,6 +270,28 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
                 return FormValidation.error(message);
             }
             return FormValidation.ok();
+        }
+
+        public ListBoxModel doFillObjectACLItems(@QueryParameter final String objectACL) {
+            ListBoxModel items = new ListBoxModel();
+
+            items.add(Messages.OSSPublish_ObjectACLUnspecified(), "");
+            items.add(Messages.OSSPublish_ObjectACLDefault(), CannedAccessControlList.Default.toString());
+            items.add(Messages.OSSPublish_ObjectACLPrivate(), CannedAccessControlList.Private.toString());
+            items.add(Messages.OSSPublish_ObjectACLPublicRead(), CannedAccessControlList.PublicRead.toString());
+            items.add(Messages.OSSPublish_ObjectACLPublicReadWrite(), CannedAccessControlList.PublicReadWrite.toString());
+
+            ListBoxModel.Option option = items.stream()
+                    .filter(item -> item.value.equals(StringUtils.defaultString(objectACL)))
+                    .findAny().orElse(null);
+
+            if (option != null) {
+                option.selected = true;
+            } else {
+                items.get(0).selected = true;
+            }
+
+            return items;
         }
 
         @Override
