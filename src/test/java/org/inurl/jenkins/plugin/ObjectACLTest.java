@@ -61,8 +61,10 @@ public class ObjectACLTest {
             project.getPublishersList().add(publisher);
             jenkins.configRoundtrip(project);
             assertEquals(acl, project.getPublishersList().get(OSSPublisher.class).getObjectACL());
+            assertEquals("test-secret", project.getPublishersList().get(OSSPublisher.class).getAccessKeySecret());
             project.doReload();
             assertEquals(acl, project.getPublishersList().get(OSSPublisher.class).getObjectACL());
+            assertEquals("test-secret", project.getPublishersList().get(OSSPublisher.class).getAccessKeySecret());
         }
     }
 

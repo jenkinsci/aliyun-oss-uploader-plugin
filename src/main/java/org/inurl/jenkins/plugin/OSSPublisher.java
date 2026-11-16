@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
-import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectRequest;
@@ -26,11 +27,12 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 public class OSSPublisher extends Publisher implements SimpleBuildStep {
 
@@ -62,7 +64,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     public String getAccessKeySecret() {
-        return accessKeySecret.getPlainText();
+        return Secret.toString(accessKeySecret);
     }
 
     public String getBucketName() {
@@ -101,7 +103,12 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
             return null;
         }
         try {
-            return CannedAccessControlList.parse(value);
+            CannedAccessControlList acl = CannedAccessControlList.parse(value);
+            if (acl != CannedAccessControlList.Default && acl != CannedAccessControlList.Private
+                    && acl != CannedAccessControlList.PublicRead && acl != CannedAccessControlList.PublicReadWrite) {
+                throw new IllegalArgumentException(Messages.OSSPublish_ObjectACLNotSupport());
+            }
+            return acl;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(Messages.OSSPublish_ObjectACLNotSupport(), e);
         }
@@ -134,38 +141,40 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-            @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher,
+            @NonNull TaskListener listener) throws InterruptedException, IOException {
         // Also validate settings loaded directly from existing job XML.
         parseObjectACL(objectACL);
         PrintStream logger = listener.getLogger();
         EnvVars envVars = run.getEnvironment(listener);
-        OSSClient client = new OSSClient(endpoint, accessKeyId, accessKeySecret.getPlainText());
+        OSS client = new OSSClientBuilder().build(endpoint, accessKeyId, Secret.toString(accessKeySecret));
+        try {
+            String local = localPath.substring(1);
 
-        String local = localPath.substring(1);
-        
-        String[] remotes = remotePath.split(",");
-        for (String remote : remotes) {
-            remote = remote.substring(1);
-            String expandLocal = envVars.expand(local);
-            String expandRemote = envVars.expand(remote);
-            logger.println("expandLocalPath =>" + expandLocal);
-            logger.println("expandRemotePath =>" + expandRemote);
-            FilePath p = new FilePath(workspace, expandLocal);
-            if (p.isDirectory()) {
-                logger.println("upload dir => " + p);
-                upload(client, logger, expandRemote, p, true);
-                logger.println("upload dir success");
-            } else {
-                logger.println("upload file => " + p);
-                uploadFile(client, logger, expandRemote, p);
-                logger.println("upload file success");
+            String[] remotes = remotePath.split(",");
+            for (String remote : remotes) {
+                remote = remote.substring(1);
+                String expandLocal = envVars.expand(local);
+                String expandRemote = envVars.expand(remote);
+                logger.println("expandLocalPath =>" + expandLocal);
+                logger.println("expandRemotePath =>" + expandRemote);
+                FilePath p = new FilePath(workspace, expandLocal);
+                if (p.isDirectory()) {
+                    logger.println("upload dir => " + p);
+                    upload(client, logger, expandRemote, p, true);
+                    logger.println("upload dir success");
+                } else {
+                    logger.println("upload file => " + p);
+                    uploadFile(client, logger, expandRemote, p);
+                    logger.println("upload file success");
+                }
             }
+        } finally {
+            client.shutdown();
         }
-        
     }
 
-    private void upload(OSSClient client, PrintStream logger, String base, FilePath path, boolean root)
+    private void upload(OSS client, PrintStream logger, String base, FilePath path, boolean root)
             throws InterruptedException, IOException {
         if (path.isDirectory()) {
             for (FilePath f : path.list()) {
@@ -176,7 +185,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         uploadFile(client, logger, base + "/" + path.getName(), path);
     }
 
-    private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path)
+    private void uploadFile(OSS client, PrintStream logger, String key, FilePath path)
             throws InterruptedException, IOException {
         if (!path.exists()) {
             if (this.throwExceptionWhenFilePathNotExisted) {
@@ -201,7 +210,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         throw new RuntimeException("upload fail, more than the max of retries");
     }
 
-    private void uploadFile0(OSSClient client, PrintStream logger, String key, FilePath path)
+    private void uploadFile0(OSS client, PrintStream logger, String key, FilePath path)
             throws InterruptedException, IOException {
         String realKey = key;
         if (realKey.startsWith("/")) {
@@ -225,7 +234,11 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
+        @POST
         public FormValidation doCheckMaxRetries(@QueryParameter String value) {
+            if (StringUtils.isEmpty(value)) {
+                return FormValidation.ok();
+            }
             try {
                 Integer.parseInt(value);
             } catch (Exception e) {
@@ -234,32 +247,38 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckEndpoint(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckEndpoint(@QueryParameter String value) {
             return checkValue(value, Messages.OSSPublish_MissingEndpoint());
         }
 
-        public FormValidation doCheckAccessKeyId(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckAccessKeyId(@QueryParameter String value) {
             return checkValue(value, Messages.OSSPublish_MissingAccessKeyId());
         }
 
-        public FormValidation doCheckAccessKeySecret(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckAccessKeySecret(@QueryParameter String value) {
             return checkValue(value, Messages.OSSPublish_MissingAccessKeySecret());
         }
 
-        public FormValidation doCheckBucketName(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckBucketName(@QueryParameter String value) {
             return checkValue(value, Messages.OSSPublish_MissingBucketName());
         }
 
-        public FormValidation doCheckLocalPath(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckLocalPath(@QueryParameter String value) {
             return checkBeginWithSlash(value);
         }
 
-        public FormValidation doCheckRemotePath(@QueryParameter(required = true) String value) {
+        @POST
+        public FormValidation doCheckRemotePath(@QueryParameter String value) {
             return checkBeginWithSlash(value);
         }
 
         private FormValidation checkBeginWithSlash(String value) {
-            if (!value.startsWith("/")) {
+            if (value == null || !value.startsWith("/")) {
                 return FormValidation.error(Messages.OSSPublish_MustBeginWithSlash());
             }
             return FormValidation.ok();
@@ -299,7 +318,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
             return true;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.OSSPublish_DisplayName();

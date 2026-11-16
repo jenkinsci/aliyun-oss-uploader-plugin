@@ -1,5 +1,14 @@
 # jenkins阿里云OSS上传插件
 
+## 兼容要求
+
+此开发版本要求 **Jenkins 2.555.3 或更新版本、Java 21 或 25**。
+从旧版本升级前，请先升级 Jenkins 控制器与所有代理的 Java 和 Jenkins 版本。
+已有任务配置、`aliyunOSSUpload` Pipeline 参数、缺失文件开关和对象 ACL 配置保持兼容。
+
+构建要求 Maven 3.9.6 或更新版本及 JDK 21/25；仓库的 Maven Wrapper 使用 Maven 3.9.9。
+Pipeline 依赖由与 Jenkins 基线匹配的 BOM 统一管理。
+
 ## 使用
 
 1.下载源码&编译
@@ -7,7 +16,7 @@
 ```bash
 git clone https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git
 cd aliyun-oss-uploader-plugin
-mvn package -DskipTests
+./mvnw verify
 ```
 2.在plugins管理页面上传target下的hpi文件并安装，重启jenkins
 
@@ -21,6 +30,9 @@ mvn package -DskipTests
 本地路径可以设置为文件或目录。如果设置为文件则上传单个文件，设置为目录上传整个目录
 
 ## 构建
+
+通常直接使用 `./mvnw verify`（Windows 使用 `mvnw.cmd verify`）即可完成测试与打包；
+POM 已包含 Jenkins 公共仓库配置。仅在企业网络需要自定义仓库时才需调整下面的 Maven 设置。
 
 1. 修改`${USER}/.m2/settings.xml`中的maven配置文件
 
