@@ -1,0 +1,9 @@
+<org.inurl.jenkins.plugin.OSSPublisher>
+  <endpoint>http://127.0.0.1:9</endpoint>
+  <accessKeyId>test-key</accessKeyId>
+  <accessKeySecret>test-secret</accessKeySecret>
+  <bucketName>test-bucket</bucketName>
+  <localPath>/missing-artifact</localPath>
+  <remotePath>/artifact</remotePath>
+  <maxRetries>0</maxRetries>
+</org.inurl.jenkins.plugin.OSSPublisher>

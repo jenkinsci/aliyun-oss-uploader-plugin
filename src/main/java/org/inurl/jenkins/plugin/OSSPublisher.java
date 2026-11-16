@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import javax.annotation.Nonnull;
 
 import com.aliyun.oss.OSSClient;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -23,6 +24,7 @@ import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 public class OSSPublisher extends Publisher implements SimpleBuildStep {
@@ -40,6 +42,8 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     private final String remotePath;
 
     private final String maxRetries;
+
+    private boolean throwExceptionWhenFilePathNotExisted;
 
     public String getEndpoint() {
         return endpoint;
@@ -83,6 +87,15 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         this.localPath = localPath;
         this.remotePath = remotePath;
         this.maxRetries = maxRetries;
+    }
+
+    public boolean isThrowExceptionWhenFilePathNotExisted() {
+        return throwExceptionWhenFilePathNotExisted;
+    }
+
+    @DataBoundSetter
+    public void setThrowExceptionWhenFilePathNotExisted(boolean throwExceptionWhenFilePathNotExisted) {
+        this.throwExceptionWhenFilePathNotExisted = throwExceptionWhenFilePathNotExisted;
     }
 
     @Override
@@ -134,6 +147,9 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
     private void uploadFile(OSSClient client, PrintStream logger, String key, FilePath path)
             throws InterruptedException, IOException {
         if (!path.exists()) {
+            if (this.throwExceptionWhenFilePathNotExisted) {
+                throw new AbortException("upload fail, file [" + path.getRemote() + "] not exists");
+            }
             logger.println("file [" + path.getRemote() + "] not exists, skipped");
             return;
         }
