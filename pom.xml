@@ -9,9 +9,10 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>aliyun-oss-uploader</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
     <properties>
+        <changelist>999999-SNAPSHOT</changelist>
         <jenkins.baseline>2.479</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <maven.compiler.release>17</maven.compiler.release>

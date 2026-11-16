@@ -92,6 +92,7 @@ mvn clean hpi:run
 
 ## Release documentation
 
+- [Proposed GitHub release process and versioning](docs/releasing.md)
 - [2.1.0 release notes](docs/releases/2.1.0.md)
 - [2.1.0 release and downloads](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.1.0)
 - [2.0.0 release notes](docs/releases/2.0.0.md)
