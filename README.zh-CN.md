@@ -84,5 +84,5 @@ mvn clean hpi:run
 
 ## 发布文档
 
-- [2.0.0 发布说明](RELEASE_NOTES.zh-CN.md)
-- [2.0.0 发布准备记录](RELEASE_PREPARATION.zh-CN.md)
+- [2.0.0 发布说明](docs/releases/2.0.0.zh-CN.md)
+- [2.0.0 正式发布与下载](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.0.0)
