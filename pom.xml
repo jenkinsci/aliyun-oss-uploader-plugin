@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.4</version>
+        <version>6.2250.va_d01d559a_209</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
@@ -12,17 +12,26 @@
     <version>1.5-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <properties>
-        <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.7.3</jenkins.version>
-        <java.level>8</java.level>
-        <!-- Other properties you may want to use:
-          ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
-          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
-          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
-     -->
+        <jenkins.baseline>2.555</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
+        <maven.compiler.release>21</maven.compiler.release>
+        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+        <hpi.bundledArtifacts>FastInfoset,aliyun-java-core,aliyun-java-sdk-core,aliyun-java-sdk-ram,aliyun-sdk-oss,bcprov-jdk18on,dom4j,istack-commons-runtime,jakarta.activation-api,jakarta.xml.bind-api,java-trace-api,jaxb-runtime,jdom2,jettison,opentelemetry-api,opentelemetry-context,opentracing-api,opentracing-noop,opentracing-util,reactive-streams,stax-ex,txw2</hpi.bundledArtifacts>
     </properties>
     <name>Aliyun OSS Uploader</name>
     <description>Aliyun OSS Uploader plugin</description>
+    <url>https://github.com/jenkinsci/aliyun-oss-uploader-plugin</url>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>7349.vd0a_cb_6c87a_31</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
         <license>
@@ -31,56 +40,95 @@
         </license>
     </licenses>
     <dependencies>
+        <!-- Compile-time meta-annotations for SpotBugs annotations; not packaged. -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-lang3-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>apache-httpcomponents-client-4-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>gson-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>2.8.3</version>
+            <version>3.18.5</version>
+            <exclusions>
+                <!-- Use the compatible JAXB 2.x APIs from the runtime's Jakarta coordinates. -->
+                <exclusion>
+                    <groupId>javax.xml.bind</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>javax.activation-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <!-- Supplied by Jenkins core or the corresponding API plugins. -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.39</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.11.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
-            <version>2.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>2.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.20</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>2.14</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -94,7 +142,7 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/jenkinsci/aliyun-oss-uploader-plugin.git</connection>
+        <connection>scm:git:https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/aliyun-oss-uploader-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/aliyun-oss-uploader-plugin</url>
       <tag>HEAD</tag>
