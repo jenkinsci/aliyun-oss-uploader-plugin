@@ -4,7 +4,7 @@
 
 ## 兼容要求
 
-从 2.1 起，插件要求 **Jenkins 2.479.3 或更新版本、Java 17 或 21**。
+从 2.1.0 起，插件要求 **Jenkins 2.479.3 或更新版本、Java 17 或 21**。
 较新的 Jenkins 版本可能要求更高版本的 Java。从旧版本升级前，请按需升级 Jenkins 控制器与所有代理的 Java 和 Jenkins 版本。
 已发布的 2.0.0 仍要求 Jenkins 2.555.3 或更新版本、Java 21 或 25。
 已有任务配置、`aliyunOSSUpload` Pipeline 参数、缺失文件开关和对象 ACL 配置保持兼容。
@@ -85,7 +85,7 @@ mvn clean hpi:run
 
 ## 发布文档
 
-- [2.1 发布说明](docs/releases/2.1.zh-CN.md)
-- [2.1 正式发布与下载](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.1)
+- [2.1.0 发布说明](docs/releases/2.1.0.zh-CN.md)
+- [2.1.0 正式发布与下载](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.1.0)
 - [2.0.0 发布说明](docs/releases/2.0.0.zh-CN.md)
 - [2.0.0 正式发布与下载](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.0.0)
