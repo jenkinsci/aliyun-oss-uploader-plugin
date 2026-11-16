@@ -67,7 +67,11 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
         return remotePath;
     }
 
-    public int getMaxRetries() {
+    public String getMaxRetries() {
+        return maxRetries;
+    }
+
+    private int maxRetriesAsInt() {
         return StringUtils.isEmpty(maxRetries) ? 3 : Integer.parseInt(maxRetries);
     }
 
@@ -143,7 +147,7 @@ public class OSSPublisher extends Publisher implements SimpleBuildStep {
             logger.println("file [" + path.getRemote() + "] not exists, skipped");
             return;
         }
-        int maxRetries = getMaxRetries();
+        int maxRetries = maxRetriesAsInt();
         int retries = 0;
         do {
             if (retries > 0) {
