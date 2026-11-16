@@ -84,5 +84,5 @@ mvn clean hpi:run
 
 ## 发布文档
 
-- [2.0.0 发布说明草稿](RELEASE_NOTES.zh-CN.md)
+- [2.0.0 发布说明](RELEASE_NOTES.zh-CN.md)
 - [2.0.0 发布准备记录](RELEASE_PREPARATION.zh-CN.md)

@@ -2,7 +2,7 @@
 
 [English](RELEASE_PREPARATION.md) | 简体中文
 
-准备日期：2026 年 11 月 16 日。#17 已合并，版本核对和真实 OSS 烟测已完成，维护者已授权发布 2.0.0。Maven 凭据已通过只读认证检查，当前正在执行发布。
+准备日期：2026 年 11 月 16 日。#17 已合并，版本核对和真实 OSS 烟测已完成，维护者已授权发布 2.0.0。Maven 认证和正式制品部署均于 2026 年 11 月 16 日成功。
 
 ## 版本与制品
 
@@ -30,12 +30,15 @@ GitHub 仓库推送权限与 Jenkins 制品发布权限分别核对：
 
 - 当前 GitHub 账号具有本仓库推送权限，发布说明提交已推送。
 - [官方制品发布权限配置](https://github.com/jenkins-infra/repository-permissions-updater/blob/master/permissions/plugin-aliyun-oss-uploader.yml)授予 Jenkins 账号 `raylax` 对 `io/jenkins/plugins/aliyun-oss-uploader` 的发布权限；维护者已确认使用该账号。
-- 本机已配置 `raylax` 的 Maven 发布认证，向官方仓库发送的只读认证请求成功（HTTP 200）。凭据保存在 Git 之外；该检查未上传制品，实际部署权限将在正式部署时验证。
+- 本机已配置 `raylax` 的 Maven 发布认证，向官方仓库发送的只读认证请求成功（HTTP 200）。凭据保存在 Git 之外；该检查未上传制品，后续正式部署成功，已确认上传权限。
 
-## 正式发布前的剩余步骤
+## 发布结果
 
-1. 按照已获授权的 [Jenkins 手工发布流程](https://www.jenkins.io/doc/developer/publishing/releasing-manually/)发布 `2.0.0`，标签为 `aliyun-oss-uploader-2.0.0`，下一开发版本为 `2.0.1-SNAPSHOT`。
-2. 核对已部署制品和发布标签。父 POM 使用的 server ID 为 `maven.jenkins-ci.org`；凭据保存在 Git 之外。
-3. 发布中英文公告并记录部署结果。
+- `release:prepare` 成功，21 项测试通过，失败和错误均为 0；打包和静态检查通过。
+- 正式标签：[`aliyun-oss-uploader-2.0.0`](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.0.0)。
+- `release:perform` 成功，POM、HPI、JAR、源码及 Javadoc 已部署至 [Jenkins 正式制品仓库](https://repo.jenkins-ci.org/releases/io/jenkins/plugins/aliyun-oss-uploader/2.0.0/)。
+- Jenkins 父 POM 的发布配置在 `release:perform` 中跳过重复测试；测试已在 `release:prepare` 阶段成功执行。
+- 完整下载的 HPI 与本地发布构建的 SHA-256 一致；ZIP 完整性、插件版本 `2.0.0` 和最低 Jenkins 版本 `2.555.3` 均已核验。官方元数据包含 `2.0.0`，并保留所有历史版本。
+- `master` 的下一开发版本为 `2.0.1-SNAPSHOT`。
 
-本记录描述正式部署前已完成的检查；发布命令成功后再确认部署结果。
+凭据仍保存在 Git 之外的本地 Maven 配置中。已发布的正式制品不得覆盖。

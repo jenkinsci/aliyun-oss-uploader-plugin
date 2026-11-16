@@ -2,7 +2,7 @@
 
 English | [简体中文](RELEASE_PREPARATION.zh-CN.md)
 
-Prepared on November 16, 2026. PR #17 is merged, version checks and the real OSS smoke test are complete, and the maintainer has authorized the 2.0.0 release. Maven credentials passed a read-only authentication check; publication is now in progress.
+Prepared on November 16, 2026. PR #17 is merged, version checks and the real OSS smoke test are complete, and the maintainer authorized the 2.0.0 release. Maven authentication and the formal artifact deployment succeeded on November 16, 2026.
 
 ## Version and artifact
 
@@ -30,12 +30,15 @@ GitHub push access and Jenkins artifact publishing rights were checked separatel
 
 - The current GitHub account has push access to this repository, and the release-notes commit has been pushed.
 - The [official artifact permission configuration](https://github.com/jenkins-infra/repository-permissions-updater/blob/master/permissions/plugin-aliyun-oss-uploader.yml) grants Jenkins account `raylax` permission to publish `io/jenkins/plugins/aliyun-oss-uploader`. The maintainer confirmed this account will be used.
-- Maven publishing authentication is configured locally for `raylax`. A read-only request to the official repository authenticated successfully (HTTP 200). Credentials remain outside Git; this check did not upload artifacts. Actual deployment permission will be verified by the release deployment.
+- Maven publishing authentication is configured locally for `raylax`. A read-only request to the official repository authenticated successfully (HTTP 200). Credentials remain outside Git; this check did not upload artifacts. The subsequent release deployment succeeded, confirming upload permission.
 
-## Remaining release steps
+## Release result
 
-1. Run the authorized [Jenkins manual release procedure](https://www.jenkins.io/doc/developer/publishing/releasing-manually/) for version `2.0.0` and tag `aliyun-oss-uploader-2.0.0`; the next development version is `2.0.1-SNAPSHOT`.
-2. Verify the deployed artifacts and the release tag. The parent POM uses server ID `maven.jenkins-ci.org`; credentials stay outside Git.
-3. Publish the bilingual release announcement and record the deployment result.
+- `release:prepare` succeeded with 21 tests passing and no failures or errors; packaging and static checks passed.
+- Release tag: [`aliyun-oss-uploader-2.0.0`](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.0.0).
+- `release:perform` succeeded and deployed the POM, HPI, JAR, sources, and Javadoc to the [Jenkins releases repository](https://repo.jenkins-ci.org/releases/io/jenkins/plugins/aliyun-oss-uploader/2.0.0/).
+- The Jenkins parent release profile skips repeated tests during `release:perform`; the tests ran successfully during `release:prepare`.
+- The downloaded HPI matches the local release build by SHA-256; ZIP integrity, plugin version `2.0.0`, and minimum Jenkins version `2.555.3` were verified. Official metadata includes `2.0.0` and retains all previous versions.
+- The next development version on `master` is `2.0.1-SNAPSHOT`.
 
-This record describes the checks completed before deployment. Publication will be confirmed after the release commands succeed.
+Credentials remain in the local Maven configuration outside Git. Published release artifacts must not be overwritten.

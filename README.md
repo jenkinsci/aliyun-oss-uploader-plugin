@@ -90,5 +90,5 @@ mvn clean hpi:run
 
 ## Release documentation
 
-- [2.0.0 release notes draft](RELEASE_NOTES.md)
+- [2.0.0 release notes](RELEASE_NOTES.md)
 - [2.0.0 release preparation](RELEASE_PREPARATION.md)
