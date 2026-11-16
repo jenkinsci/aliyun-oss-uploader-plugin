@@ -60,7 +60,7 @@ public class MissingUploadPathTest {
             jenkins.configRoundtrip(project);
             assertEquals(enabled, project.getPublishersList().get(OSSPublisher.class)
                     .isThrowExceptionWhenFilePathNotExisted());
-            project.reload();
+            project.doReload();
             assertEquals(enabled, project.getPublishersList().get(OSSPublisher.class)
                     .isThrowExceptionWhenFilePathNotExisted());
         }
