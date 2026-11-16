@@ -1,42 +1,44 @@
-# jenkins阿里云OSS上传插件
+# Aliyun OSS Uploader for Jenkins
 
-## 兼容要求
+English | [简体中文](README.zh-CN.md)
 
-此开发版本要求 **Jenkins 2.555.3 或更新版本、Java 21 或 25**。
-从旧版本升级前，请先升级 Jenkins 控制器与所有代理的 Java 和 Jenkins 版本。
-已有任务配置、`aliyunOSSUpload` Pipeline 参数、缺失文件开关和对象 ACL 配置保持兼容。
+## Requirements
 
-构建要求 Maven 3.9.6 或更新版本及 JDK 21/25；仓库的 Maven Wrapper 使用 Maven 3.9.9。
-Pipeline 依赖由与 Jenkins 基线匹配的 BOM 统一管理。
+The current development version requires **Jenkins 2.555.3 or newer and Java 21 or 25**. Upgrade Jenkins and the Java runtimes on the controller and all agents before upgrading from an older plugin version.
 
-## 使用
+Existing job configuration, `aliyunOSSUpload` Pipeline parameters, the missing-file option, and object ACL settings remain compatible.
 
-1.下载源码&编译
+Building from source requires Maven 3.9.6 or newer and JDK 21/25. The Maven Wrapper uses Maven 3.9.9. Pipeline dependencies are managed by a BOM matching the Jenkins baseline.
+
+## Usage
+
+1. Clone the repository and build the plugin:
 
 ```bash
 git clone https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git
 cd aliyun-oss-uploader-plugin
 ./mvnw verify
 ```
-2.在plugins管理页面上传target下的hpi文件并安装，重启jenkins
 
-3.修改项目，增加`构建后操作`，选择`阿里云OSS上传`
-![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step1.png)
+2. Upload the HPI file from `target` through the Jenkins plugin manager, install its dependencies, and restart Jenkins.
+3. Add the **Aliyun OSS Upload** post-build action to a job.
 
-4.填写阿里云OSS配置信息
-![](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step2.png)
+![Adding the post-build action](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step1.png)
 
-> 本地路径为相对于workspace的路径，例如填写为`/abc`，则本地路径为`${WORKSPACE}/abc`
-本地路径可以设置为文件或目录。如果设置为文件则上传单个文件，设置为目录上传整个目录
+4. Enter the OSS endpoint, credentials, bucket, and upload paths.
 
-## 构建
+![Configuring OSS uploads](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/raw/master/image/step2.png)
 
-通常直接使用 `./mvnw verify`（Windows 使用 `mvnw.cmd verify`）即可完成测试与打包；
-POM 已包含 Jenkins 公共仓库配置。仅在企业网络需要自定义仓库时才需调整下面的 Maven 设置。
+Local paths are relative to the workspace despite the leading `/`: `/abc` refers to `${WORKSPACE}/abc`. A file path uploads one file; a directory path uploads the directory recursively.
 
-1. 修改`${USER}/.m2/settings.xml`中的maven配置文件
+## Building
 
-在`mirrors`节点中增加
+Normally, `./mvnw verify` runs the tests and builds the plugin. On Windows, use `mvnw.cmd verify`. The POM already declares the Jenkins public repository. Only adjust Maven settings when your network requires a custom repository configuration.
+
+For such a configuration, add the following fragments to `~/.m2/settings.xml` as needed.
+
+In `mirrors`:
+
 ```xml
 <mirror>
   <id>repo.jenkins-ci.org</id>
@@ -44,11 +46,15 @@ POM 已包含 Jenkins 公共仓库配置。仅在企业网络需要自定义仓�
   <mirrorOf>m.g.o-public</mirrorOf>
 </mirror>
 ```
-在`pluginGroups`节点中增加
+
+In `pluginGroups`:
+
 ```xml
 <pluginGroup>org.jenkins-ci.tools</pluginGroup>
 ```
-在`profiles`节点中增加
+
+In `profiles`:
+
 ```xml
 <profile>
   <id>jenkins</id>
@@ -70,12 +76,19 @@ POM 已包含 Jenkins 公共仓库配置。仅在企业网络需要自定义仓�
 </profile>
 ```
 
-2. 打包
+To package without running tests:
+
 ```bash
 mvn clean package -DskipTests
 ```
 
-3. 运行
+To run Jenkins locally for development:
+
 ```bash
 mvn clean hpi:run
 ```
+
+## Release documentation
+
+- [2.0.0 release notes draft](RELEASE_NOTES.md)
+- [2.0.0 release preparation](RELEASE_PREPARATION.md)
