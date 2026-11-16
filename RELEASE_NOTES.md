@@ -1,8 +1,8 @@
-# Aliyun OSS Uploader 2.0.0 Release Notes Draft
+# Aliyun OSS Uploader 2.0.0 Release Notes
 
 English | [简体中文](RELEASE_NOTES.zh-CN.md)
 
-Status: not published. Release date pending.
+Release date: November 16, 2026.
 
 Version 2.0.0 adds object ACL and missing-path options, fixes Pipeline argument reconstruction, and updates the Jenkins baseline, dependencies, and build environment together.
 
@@ -46,4 +46,4 @@ CI passes on Linux with Java 21, Windows with Java 21, and Linux with Java 25, w
 
 A real OSS smoke test passed using a temporary Jenkins 2.555.3 / Java 21 environment. It verified files, nested directories, private/default/unset ACLs, and both missing-path behaviors. All five test objects were checked and deleted, with no objects left behind. Public-read and public-read-write headers are covered by automated HTTP tests; the real-bucket smoke test retained private access.
 
-[Full changes since 1.4](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/compare/aliyun-oss-uploader-1.4...e33d3317b74632838dd5cb3407454dba1fdd5a61)
+[Full changes since 1.4](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/compare/aliyun-oss-uploader-1.4...aliyun-oss-uploader-2.0.0)

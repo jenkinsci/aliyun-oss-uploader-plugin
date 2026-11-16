@@ -1,8 +1,8 @@
-# Aliyun OSS Uploader 2.0.0 发布说明草稿
+# Aliyun OSS Uploader 2.0.0 发布说明
 
 [English](RELEASE_NOTES.md) | 简体中文
 
-状态：未发布，发布日期待定。
+发布日期：2026 年 11 月 16 日。
 
 2.0.0 新增对象 ACL 和缺失文件处理选项，修复 Pipeline 参数还原问题，并统一升级 Jenkins 基线、依赖与构建环境。
 
@@ -46,4 +46,4 @@ Linux Java 21、Windows Java 21、Linux Java 25 的 CI 均通过，每个平台�
 
 真实 OSS 烟测已在临时 Jenkins 2.555.3 / Java 21 环境通过：验证了文件、嵌套目录、私有 ACL、默认及未指定 ACL，以及缺失路径的跳过和失败行为。5 个测试对象均完成内容校验并清理，无遗留对象。公共读和公共读写 ACL 的请求头由自动化 HTTP 服务测试覆盖，真实空间烟测保持私有访问。
 
-[查看自 1.4 以来的完整变更](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/compare/aliyun-oss-uploader-1.4...e33d3317b74632838dd5cb3407454dba1fdd5a61)
+[查看自 1.4 以来的完整变更](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/compare/aliyun-oss-uploader-1.4...aliyun-oss-uploader-2.0.0)

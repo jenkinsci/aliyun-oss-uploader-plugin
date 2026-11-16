@@ -2,7 +2,7 @@
 
 [English](RELEASE_PREPARATION.md) | 简体中文
 
-准备日期：2026 年 11 月 16 日。当前已完成版本核对和真实 OSS 烟测；发布认证按维护者安排稍后配置，正式发布仍需最终确认。
+准备日期：2026 年 11 月 16 日。#17 已合并，版本核对和真实 OSS 烟测已完成，维护者已授权发布 2.0.0。Maven 凭据已通过只读认证检查，当前正在执行发布。
 
 ## 版本与制品
 
@@ -30,12 +30,12 @@ GitHub 仓库推送权限与 Jenkins 制品发布权限分别核对：
 
 - 当前 GitHub 账号具有本仓库推送权限，发布说明提交已推送。
 - [官方制品发布权限配置](https://github.com/jenkins-infra/repository-permissions-updater/blob/master/permissions/plugin-aliyun-oss-uploader.yml)授予 Jenkins 账号 `raylax` 对 `io/jenkins/plugins/aliyun-oss-uploader` 的发布权限；维护者已确认使用该账号。
-- 本机尚未配置 Maven 发布认证，因此尚未验证发布凭据的有效性，也未尝试部署制品。
+- 本机已配置 `raylax` 的 Maven 发布认证，向官方仓库发送的只读认证请求成功（HTTP 200）。凭据保存在 Git 之外；该检查未上传制品，实际部署权限将在正式部署时验证。
 
 ## 正式发布前的剩余步骤
 
-1. 审阅并合并发布准备改动，确认发布说明的最终措辞。
-2. 由维护者按照 [Jenkins 手工发布文档](https://www.jenkins.io/doc/developer/publishing/releasing-manually/)配置 `raylax` 的 Maven 发布认证；父 POM 使用的 server ID 为 `maven.jenkins-ci.org`。凭据不要加入 Git 或发布说明。
-3. 获得最终发布确认后，再创建正式版本、发布标签并部署制品。
+1. 按照已获授权的 [Jenkins 手工发布流程](https://www.jenkins.io/doc/developer/publishing/releasing-manually/)发布 `2.0.0`，标签为 `aliyun-oss-uploader-2.0.0`，下一开发版本为 `2.0.1-SNAPSHOT`。
+2. 核对已部署制品和发布标签。父 POM 使用的 server ID 为 `maven.jenkins-ci.org`；凭据保存在 Git 之外。
+3. 发布中英文公告并记录部署结果。
 
-本次准备没有执行发布命令、创建发布标签或上传发布制品。
+本记录描述正式部署前已完成的检查；发布命令成功后再确认部署结果。
