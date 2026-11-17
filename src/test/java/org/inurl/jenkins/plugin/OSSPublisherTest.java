@@ -1,19 +1,25 @@
 package org.inurl.jenkins.plugin;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OSSPublisherTest {
+@WithJenkins
+class OSSPublisherTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void maxRetriesSurvivesDescribableRoundTrip() throws Exception {
+    void maxRetriesSurvivesDescribableRoundTrip() throws Exception {
         DescribableModel<OSSPublisher> model = new DescribableModel<>(OSSPublisher.class);
         for (String maxRetries : new String[] {null, "", "0", "5"}) {
             OSSPublisher publisher = new OSSPublisher("oss-example.aliyuncs.com", "access-key-id",

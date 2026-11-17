@@ -11,29 +11,36 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ObjectACLTest {
+@WithJenkins
+class ObjectACLTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void pipelineArgumentsSurviveRoundTrip() throws Exception {
+    void pipelineArgumentsSurviveRoundTrip() throws Exception {
         DescribableModel<OSSPublisher> model = new DescribableModel<>(OSSPublisher.class);
         for (String acl : new String[] {null, "", "default", "private", "public-read", "public-read-write"}) {
             OSSPublisher publisher = publisher("http://127.0.0.1:9");
@@ -47,7 +54,7 @@ public class ObjectACLTest {
     }
 
     @Test
-    public void configurationRoundTripPreservesACLAndLegacyDefaults() throws Exception {
+    void configurationRoundTripPreservesACLAndLegacyDefaults() throws Exception {
         for (String acl : new String[] {null, "default", "private", "public-read", "public-read-write"}) {
             OSSPublisher publisher;
             if (acl == null) {
@@ -69,21 +76,17 @@ public class ObjectACLTest {
     }
 
     @Test
-    public void invalidACLIsRejectedWithoutReplacingExistingSetting() {
+    void invalidACLIsRejectedWithoutReplacingExistingSetting() {
         OSSPublisher publisher = publisher("http://127.0.0.1:9");
         publisher.setObjectACL("private");
         for (String invalid : new String[] {"invalid", "Unknown", "authenticated-read", " private "}) {
-            try {
-                publisher.setObjectACL(invalid);
-                fail("Expected invalid object ACL to be rejected: " + invalid);
-            } catch (IllegalArgumentException expected) {
-                assertEquals("private", publisher.getObjectACL());
-            }
+            assertThrows(IllegalArgumentException.class, () -> publisher.setObjectACL(invalid));
+            assertEquals("private", publisher.getObjectACL());
         }
     }
 
     @Test
-    public void selectorHandlesUnsetAndExplicitValues() {
+    void selectorHandlesUnsetAndExplicitValues() {
         OSSPublisher.DescriptorImpl descriptor = jenkins.jenkins.getDescriptorByType(OSSPublisher.DescriptorImpl.class);
         for (String acl : new String[] {null, "", "default", "private", "public-read", "public-read-write"}) {
             ListBoxModel options = descriptor.doFillObjectACLItems(acl);
@@ -99,7 +102,7 @@ public class ObjectACLTest {
     }
 
     @Test
-    public void uploadRequestsSendOnlyExplicitACLHeaders() throws Exception {
+    void uploadRequestsSendOnlyExplicitACLHeaders() throws Exception {
         BlockingQueue<Upload> uploads = new LinkedBlockingQueue<>();
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
@@ -112,7 +115,7 @@ public class ObjectACLTest {
                 }
             }
             uploads.add(new Upload(exchange.getRequestMethod(), exchange.getRequestURI().getPath(),
-                    exchange.getRequestHeaders().getFirst("x-oss-object-acl"), body.toString("UTF-8")));
+                    exchange.getRequestHeaders().getFirst("x-oss-object-acl"), body.toString(StandardCharsets.UTF_8)));
             exchange.getResponseHeaders().set("ETag", "\"d41d8cd98f00b204e9800998ecf8427e\"");
             exchange.getResponseHeaders().set("x-oss-request-id", "test-request");
             exchange.sendResponseHeaders(200, -1);
@@ -155,17 +158,6 @@ public class ObjectACLTest {
                 "/artifact.txt", "/artifact.txt", "0");
     }
 
-    private static final class Upload {
-        private final String method;
-        private final String path;
-        private final String acl;
-        private final String body;
-
-        private Upload(String method, String path, String acl, String body) {
-            this.method = method;
-            this.path = path;
-            this.acl = acl;
-            this.body = body;
-        }
+    private record Upload(String method, String path, String acl, String body) {
     }
 }

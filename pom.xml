@@ -15,6 +15,7 @@
         <jenkins.baseline>2.479</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <maven.compiler.release>17</maven.compiler.release>
+        <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
         <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
         <hpi.bundledArtifacts>FastInfoset,aliyun-java-core,aliyun-java-sdk-core,aliyun-java-sdk-ram,aliyun-sdk-oss,dom4j,istack-commons-runtime,jakarta.activation-api,jakarta.xml.bind-api,java-trace-api,jaxb-runtime,jdom2,jettison,opentelemetry-api,opentelemetry-context,opentracing-api,opentracing-noop,opentracing-util,reactive-streams,stax-ex,txw2</hpi.bundledArtifacts>
     </properties>
