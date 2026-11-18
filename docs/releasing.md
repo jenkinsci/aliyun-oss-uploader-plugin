@@ -1,9 +1,9 @@
-# Proposed GitHub release process
+# GitHub release process
 
 This configuration follows the [Jenkins plugin CD guide](https://www.jenkins.io/doc/developer/publishing/releasing-cd/).
-Before merging, obtain maintainer agreement and hosting-team review, and arrange CD enablement through a linked RPU pull request.
-The RPU change and credentials provisioning are separate prerequisites; this proposal does not enable them.
-Review the effect of exclusive CD on existing manual upload permissions with raylax and the hosting team before proceeding.
+CD is enabled through [RPU #5461](https://github.com/jenkins-infra/repository-permissions-updater/pull/5461), and the workflow credentials have been provisioned.
+As agreed with raylax, releases use exclusive CD: publication goes through GitHub Actions, and individual Artifactory upload permissions are removed.
+Exclusive CD still supports manually triggered releases; it does not require automatic publication after merges.
 
 ## Version numbers
 

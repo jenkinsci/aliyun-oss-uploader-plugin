@@ -85,7 +85,7 @@ mvn clean hpi:run
 
 ## 发布文档
 
-- [GitHub 发布流程与版本编号提案（英文）](docs/releasing.md)
+- [GitHub 发布流程与版本编号（英文）](docs/releasing.md)
 - [2.1.0 发布说明](docs/releases/2.1.0.zh-CN.md)
 - [2.1.0 正式发布与下载](https://github.com/jenkinsci/aliyun-oss-uploader-plugin/releases/tag/aliyun-oss-uploader-2.1.0)
 - [2.0.0 发布说明](docs/releases/2.0.0.zh-CN.md)
