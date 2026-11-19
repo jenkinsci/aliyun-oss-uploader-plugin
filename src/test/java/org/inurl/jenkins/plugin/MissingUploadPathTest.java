@@ -7,20 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class MissingUploadPathTest {
+@WithJenkins
+class MissingUploadPathTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void legacyConfigurationStillSkipsMissingFiles() throws Exception {
+    void legacyConfigurationStillSkipsMissingFiles() throws Exception {
         OSSPublisher publisher = (OSSPublisher) Jenkins.XSTREAM2.fromXML(
                 getClass().getResource("legacy-publisher.xml"));
         assertFalse(publisher.isThrowExceptionWhenFilePathNotExisted());
@@ -30,7 +36,7 @@ public class MissingUploadPathTest {
     }
 
     @Test
-    public void missingFilesAreSkippedWhenExplicitlyDisabled() throws Exception {
+    void missingFilesAreSkippedWhenExplicitlyDisabled() throws Exception {
         OSSPublisher publisher = publisher();
         publisher.setThrowExceptionWhenFilePathNotExisted(false);
         FreeStyleBuild build = buildWith(publisher);
@@ -39,7 +45,7 @@ public class MissingUploadPathTest {
     }
 
     @Test
-    public void missingFilesFailTheBuildWhenEnabled() throws Exception {
+    void missingFilesFailTheBuildWhenEnabled() throws Exception {
         OSSPublisher publisher = publisher();
         publisher.setThrowExceptionWhenFilePathNotExisted(true);
         FreeStyleBuild build = buildWith(publisher);
@@ -50,7 +56,7 @@ public class MissingUploadPathTest {
     }
 
     @Test
-    public void checkboxSurvivesConfigurationRoundTripAndReload() throws Exception {
+    void checkboxSurvivesConfigurationRoundTripAndReload() throws Exception {
         for (boolean enabled : new boolean[] {false, true}) {
             FreeStyleProject project = jenkins.createFreeStyleProject();
             OSSPublisher publisher = publisher();
@@ -67,7 +73,7 @@ public class MissingUploadPathTest {
     }
 
     @Test
-    public void pipelineArgumentsSupportOmissionAndBothBooleanValues() throws Exception {
+    void pipelineArgumentsSupportOmissionAndBothBooleanValues() throws Exception {
         DescribableModel<OSSPublisher> model = new DescribableModel<>(OSSPublisher.class);
         Map<String, Object> arguments = new HashMap<>();
         arguments.put("endpoint", "http://127.0.0.1:9");

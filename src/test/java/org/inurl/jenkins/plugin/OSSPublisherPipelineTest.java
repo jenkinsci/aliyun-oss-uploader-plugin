@@ -4,19 +4,25 @@ import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class OSSPublisherPipelineTest {
+@WithJenkins
+class OSSPublisherPipelineTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void omittedOptionalArgumentsPreservePipelineBehavior() throws Exception {
+    void omittedOptionalArgumentsPreservePipelineBehavior() throws Exception {
         WorkflowRun build = runPipeline("");
         jenkins.assertBuildStatusSuccess(build);
         jenkins.assertLogContains("not exists, skipped", build);
@@ -24,7 +30,7 @@ public class OSSPublisherPipelineTest {
     }
 
     @Test
-    public void explicitACLAndMissingFileFlagWorkInPipeline() throws Exception {
+    void explicitACLAndMissingFileFlagWorkInPipeline() throws Exception {
         WorkflowRun build = runPipeline(", maxRetries: '0', objectACL: 'private', throwExceptionWhenFilePathNotExisted: true");
         jenkins.assertBuildStatus(Result.FAILURE, build);
         jenkins.assertLogContains("upload fail, file [", build);
