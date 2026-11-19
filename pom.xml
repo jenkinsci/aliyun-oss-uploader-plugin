@@ -146,14 +146,6 @@
         </dependency>
     </dependencies>
 
-    <developers>
-      <developer>
-        <id>raylax</id>
-        <name>YangchunYu</name>
-        <email>raylax@inurl.org</email>
-      </developer>
-    </developers>
-
     <scm>
         <connection>scm:git:https://github.com/jenkinsci/aliyun-oss-uploader-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/aliyun-oss-uploader-plugin.git</developerConnection>

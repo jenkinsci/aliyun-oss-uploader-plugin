@@ -90,6 +90,10 @@ To run Jenkins locally for development:
 mvn clean hpi:run
 ```
 
+## Maintainers and contributors
+
+The Aliyun OSS Uploader Developers team maintains this plugin with contributions from the wider Jenkins community.
+
 ## Release documentation
 
 - [GitHub release process and versioning](docs/releasing.md)

@@ -83,6 +83,10 @@ mvn clean package -DskipTests
 mvn clean hpi:run
 ```
 
+## 维护者与贡献者
+
+本插件由 Aliyun OSS Uploader 开发者团队维护，Jenkins 社区贡献者也共同参与开发和改进。
+
 ## 发布文档
 
 - [GitHub 发布流程与版本编号（英文）](docs/releasing.md)
